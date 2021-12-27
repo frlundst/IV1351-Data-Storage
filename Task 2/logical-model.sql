@@ -60,6 +60,14 @@ CREATE TABLE lesson (
 ALTER TABLE lesson ADD CONSTRAINT PK_lesson PRIMARY KEY (lesson_id);
 
 
+CREATE TABLE price (
+ price_id CHAR(10) NOT NULL,
+ typeOfLesson CHAR(10)
+);
+
+ALTER TABLE price ADD CONSTRAINT PK_price PRIMARY KEY (price_id);
+
+
 CREATE TABLE rental_instrument (
  rental_instrument_id SERIAL NOT NULL,
  instrument VARCHAR(500),

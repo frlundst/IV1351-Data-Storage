@@ -1,11 +1,11 @@
 CREATE TABLE instructor (
- instructor_id UNIQUE SERIAL NOT NULL,
+ instructor_id SERIAL NOT NULL,
  name VARCHAR(500),
  address VARCHAR(500),
  teach_ensambles BOOLEAN
 );
 
-ALTER TABLE instructor ADD CONSTRAINT PK_instructor PRIMARY KEY (instructor_id UNIQUE);
+ALTER TABLE instructor ADD CONSTRAINT PK_instructor PRIMARY KEY (instructor_id);
 
 
 CREATE TABLE instructor_email (
@@ -25,13 +25,13 @@ ALTER TABLE instructor_instrument ADD CONSTRAINT PK_instructor_instrument PRIMAR
 
 
 CREATE TABLE instructor_payment (
- payment_id UNIQUE SERIAL NOT NULL,
+ payment_id SERIAL NOT NULL,
  instructor_id INT NOT NULL,
  amount INT,
  date DATE
 );
 
-ALTER TABLE instructor_payment ADD CONSTRAINT PK_instructor_payment PRIMARY KEY (payment_id UNIQUE,instructor_id);
+ALTER TABLE instructor_payment ADD CONSTRAINT PK_instructor_payment PRIMARY KEY (payment_id,instructor_id);
 
 
 CREATE TABLE instructor_phone (
@@ -43,7 +43,7 @@ ALTER TABLE instructor_phone ADD CONSTRAINT PK_instructor_phone PRIMARY KEY (ins
 
 
 CREATE TABLE lesson (
- lesson_id UNIQUE SERIAL NOT NULL,
+ lesson_id SERIAL NOT NULL,
  instructor_id  INT NOT NULL,
  type_of_lesson VARCHAR(500),
  min_nr_slots VARCHAR(500),
@@ -57,22 +57,22 @@ CREATE TABLE lesson (
  time_end DATE
 );
 
-ALTER TABLE lesson ADD CONSTRAINT PK_lesson PRIMARY KEY (lesson_id UNIQUE);
+ALTER TABLE lesson ADD CONSTRAINT PK_lesson PRIMARY KEY (lesson_id);
 
 
 CREATE TABLE rental_instrument (
- rental_instrument_id UNIQUE SERIAL NOT NULL,
+ rental_instrument_id SERIAL NOT NULL,
  instrument VARCHAR(500),
  brand VARCHAR(500),
  available VARCHAR(500),
  quantity VARCHAR(500)
 );
 
-ALTER TABLE rental_instrument ADD CONSTRAINT PK_rental_instrument PRIMARY KEY (rental_instrument_id UNIQUE);
+ALTER TABLE rental_instrument ADD CONSTRAINT PK_rental_instrument PRIMARY KEY (rental_instrument_id);
 
 
 CREATE TABLE student (
- student_id UNIQUE SERIAL NOT NULL,
+ student_id SERIAL NOT NULL,
  personal_number VARCHAR(12),
  name VARCHAR(500),
  age VARCHAR(500),
@@ -82,7 +82,7 @@ CREATE TABLE student (
  is_accepted BOOLEAN
 );
 
-ALTER TABLE student ADD CONSTRAINT PK_student PRIMARY KEY (student_id UNIQUE);
+ALTER TABLE student ADD CONSTRAINT PK_student PRIMARY KEY (student_id);
 
 
 CREATE TABLE student_email (
@@ -110,13 +110,13 @@ ALTER TABLE student_lesson ADD CONSTRAINT PK_student_lesson PRIMARY KEY (student
 
 
 CREATE TABLE student_payment (
- payment_id UNIQUE SERIAL NOT NULL,
+ payment_id SERIAL NOT NULL,
  student_id INT NOT NULL,
  amount INT,
  discount INT
 );
 
-ALTER TABLE student_payment ADD CONSTRAINT PK_student_payment PRIMARY KEY (payment_id UNIQUE,student_id);
+ALTER TABLE student_payment ADD CONSTRAINT PK_student_payment PRIMARY KEY (payment_id,student_id);
 
 
 CREATE TABLE student_phone (
@@ -128,15 +128,15 @@ ALTER TABLE student_phone ADD CONSTRAINT PK_student_phone PRIMARY KEY (student_i
 
 
 CREATE TABLE lease_contract (
- lease_id UNIQUE SERIAL NOT NULL,
- student_id UNIQUE INT NOT NULL,
+ lease_id SERIAL NOT NULL,
+ student_id INT NOT NULL,
  rental_instrument_id INT NOT NULL,
  price VARCHAR(500),
  time_start DATE,
  time_end DATE
 );
 
-ALTER TABLE lease_contract ADD CONSTRAINT PK_lease_contract PRIMARY KEY (lease_id UNIQUE,student_id UNIQUE);
+ALTER TABLE lease_contract ADD CONSTRAINT PK_lease_contract PRIMARY KEY (lease_id,student_id);
 
 
 CREATE TABLE parent_email (
@@ -155,44 +155,44 @@ CREATE TABLE parent_phone (
 ALTER TABLE parent_phone ADD CONSTRAINT PK_parent_phone PRIMARY KEY (student_id);
 
 
-ALTER TABLE instructor_email ADD CONSTRAINT FK_instructor_email_0 FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id UNIQUE);
+ALTER TABLE instructor_email ADD CONSTRAINT FK_instructor_email_0 FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id);
 
 
-ALTER TABLE instructor_instrument ADD CONSTRAINT FK_instructor_instrument_0 FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id UNIQUE);
+ALTER TABLE instructor_instrument ADD CONSTRAINT FK_instructor_instrument_0 FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id);
 
 
-ALTER TABLE instructor_payment ADD CONSTRAINT FK_instructor_payment_0 FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id UNIQUE);
+ALTER TABLE instructor_payment ADD CONSTRAINT FK_instructor_payment_0 FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id);
 
 
-ALTER TABLE instructor_phone ADD CONSTRAINT FK_instructor_phone_0 FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id UNIQUE);
+ALTER TABLE instructor_phone ADD CONSTRAINT FK_instructor_phone_0 FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id);
 
 
-ALTER TABLE lesson ADD CONSTRAINT FK_lesson_0 FOREIGN KEY (instructor_id ) REFERENCES instructor (instructor_id UNIQUE);
+ALTER TABLE lesson ADD CONSTRAINT FK_lesson_0 FOREIGN KEY (instructor_id ) REFERENCES instructor (instructor_id);
 
 
-ALTER TABLE student_email ADD CONSTRAINT FK_student_email_0 FOREIGN KEY (student_id) REFERENCES student (student_id UNIQUE);
+ALTER TABLE student_email ADD CONSTRAINT FK_student_email_0 FOREIGN KEY (student_id) REFERENCES student (student_id);
 
 
-ALTER TABLE student_instrument ADD CONSTRAINT FK_student_instrument_0 FOREIGN KEY (student_id) REFERENCES student (student_id UNIQUE);
+ALTER TABLE student_instrument ADD CONSTRAINT FK_student_instrument_0 FOREIGN KEY (student_id) REFERENCES student (student_id);
 
 
-ALTER TABLE student_lesson ADD CONSTRAINT FK_student_lesson_0 FOREIGN KEY (student_id) REFERENCES student (student_id UNIQUE);
-ALTER TABLE student_lesson ADD CONSTRAINT FK_student_lesson_1 FOREIGN KEY (lesson_id) REFERENCES lesson (lesson_id UNIQUE);
+ALTER TABLE student_lesson ADD CONSTRAINT FK_student_lesson_0 FOREIGN KEY (student_id) REFERENCES student (student_id);
+ALTER TABLE student_lesson ADD CONSTRAINT FK_student_lesson_1 FOREIGN KEY (lesson_id) REFERENCES lesson (lesson_id);
 
 
-ALTER TABLE student_payment ADD CONSTRAINT FK_student_payment_0 FOREIGN KEY (student_id) REFERENCES student (student_id UNIQUE);
+ALTER TABLE student_payment ADD CONSTRAINT FK_student_payment_0 FOREIGN KEY (student_id) REFERENCES student (student_id);
 
 
-ALTER TABLE student_phone ADD CONSTRAINT FK_student_phone_0 FOREIGN KEY (student_id) REFERENCES student (student_id UNIQUE);
+ALTER TABLE student_phone ADD CONSTRAINT FK_student_phone_0 FOREIGN KEY (student_id) REFERENCES student (student_id);
 
 
-ALTER TABLE lease_contract ADD CONSTRAINT FK_lease_contract_0 FOREIGN KEY (student_id UNIQUE) REFERENCES student (student_id UNIQUE);
-ALTER TABLE lease_contract ADD CONSTRAINT FK_lease_contract_1 FOREIGN KEY (rental_instrument_id) REFERENCES rental_instrument (rental_instrument_id UNIQUE);
+ALTER TABLE lease_contract ADD CONSTRAINT FK_lease_contract_0 FOREIGN KEY (student_id) REFERENCES student (student_id);
+ALTER TABLE lease_contract ADD CONSTRAINT FK_lease_contract_1 FOREIGN KEY (rental_instrument_id) REFERENCES rental_instrument (rental_instrument_id);
 
 
-ALTER TABLE parent_email ADD CONSTRAINT FK_parent_email_0 FOREIGN KEY (student_id) REFERENCES student (student_id UNIQUE);
+ALTER TABLE parent_email ADD CONSTRAINT FK_parent_email_0 FOREIGN KEY (student_id) REFERENCES student (student_id);
 
 
-ALTER TABLE parent_phone ADD CONSTRAINT FK_parent_phone_0 FOREIGN KEY (student_id) REFERENCES student (student_id UNIQUE);
+ALTER TABLE parent_phone ADD CONSTRAINT FK_parent_phone_0 FOREIGN KEY (student_id) REFERENCES student (student_id);
 
 

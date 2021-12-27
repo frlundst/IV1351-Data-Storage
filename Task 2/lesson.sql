@@ -1,2 +1,0 @@
-insert into lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end) 
-values(1, 'Ensamble', '3','10', 'all', 'advanced', '303', '300','classical','');

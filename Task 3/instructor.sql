@@ -1,0 +1,10 @@
+insert into instructor (name, address, teach_ensambles) values ('Barth Drewell', '5210 Westridge Road', true);
+insert into instructor (name, address, teach_ensambles) values ('Cristen Figge', '5210 Ronald Regan Drive', true);
+insert into instructor (name, address, teach_ensambles) values ('Dacie Shouler', '52811 Vahlen Place', true);
+insert into instructor (name, address, teach_ensambles) values ('My Tooth', '533 Roxbury Road', false);
+insert into instructor (name, address, teach_ensambles) values ('Scott Cozby', '6 Melby Place', true);
+insert into instructor (name, address, teach_ensambles) values ('Alan Poulney', '946 Forest Run Hill', false);
+insert into instructor (name, address, teach_ensambles) values ('Frederico Hamm', '99 Stone Corner Crossing', false);
+insert into instructor (name, address, teach_ensambles) values ('Trudie Speedy', '9678 Clemons Court', false);
+insert into instructor (name, address, teach_ensambles) values ('Erinn Magne', '7 Old Gate Crossing', false);
+insert into instructor (name, address, teach_ensambles) values ('Toddy Champney', '05 Aberg Crossing', false);

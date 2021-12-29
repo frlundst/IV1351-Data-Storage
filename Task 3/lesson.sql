@@ -24,3 +24,17 @@ INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, in
 VALUES(9, 'Group', '2','10', 'trumpet', 'beginner', '304', '100','jazz','2022-06-10 13:00:00', '2022-06-10 15:00:00');
 INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end) 
 VALUES(10, 'Group', '5','10', 'harp', 'beginner', '304', '100','classical','2021-07-27 13:00:00', '2021-07-27 15:00:00');
+
+
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end) 
+VALUES(2, 'Group', '5','10', 'kazoo', 'intermediate', '304', '100','punk','2021-01-30 13:00:00', '2021-07-27 15:00:00');
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end) 
+VALUES(3, 'Individual', '5','10', 'harp', 'beginner', '304', '100','classical','2021-01-20 13:00:00', '2021-07-27 15:00:00');
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end) 
+VALUES(4, 'Ensamble', '5','10', 'harp', 'beginner', '304', '100','classical','2021-01-12 13:00:00', '2021-07-27 15:00:00');
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end) 
+VALUES(5, 'Group', '5','10', 'harp', 'beginner', '304', '100','classical','2021-01-15 13:00:00', '2021-07-27 15:00:00');
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end) 
+VALUES(3, 'Individual', '5','10', 'harp', 'beginner', '304', '100','classical','2021-01-15 13:00:00', '2021-07-27 15:00:00');
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end) 
+VALUES(1, 'Ensamble', '5','10', 'harp', 'beginner', '304', '100','classical','2021-01-15 13:00:00', '2021-07-27 15:00:00');

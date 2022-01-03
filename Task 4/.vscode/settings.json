@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "SOUNDGOOD_MUSICAL_SCHOOL/jdbc-postgresql-driver/postgresql-42.3.1.jar"
+    ]
+}

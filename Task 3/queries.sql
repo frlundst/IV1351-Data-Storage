@@ -23,6 +23,7 @@ WHERE EXTRACT(year FROM time_start) = 2022
 
 --"List all instructors who has given more than a specific number of lessons during the current month. Sum all lessons, independent of type,
 --and sort the result by the number of given lessons. This query will be used to find instructors risking to work too much, and will be executed daily.""
+EXPLAIN ANALYZE CREATE MATERIALIZED VIEW mv1 AS
 SELECT instructor_id as Instructor,
 COUNT(type_of_lesson) as TotalLessons
 FROM lesson

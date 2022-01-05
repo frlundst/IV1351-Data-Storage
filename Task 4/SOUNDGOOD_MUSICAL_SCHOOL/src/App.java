@@ -1,14 +1,22 @@
-package startup;
-import java.sql.*;
-
+import integration.SchoolDBException;
+import view.BlockingInterpreter;
+import controller.Controller;
 
 public class App {
-    private static final String TABLE_NAME = "student";
-    private static final String url = "jdbc:postgresql://localhost/soundgood_musical_school_v3?user=postgres&password=hej12345";
+    /**
+     * main starting method
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         try{
+            new BlockingInterpreter(new Controller()).handleCmds();
+        }catch(SchoolDBException exception){
+            exception.printStackTrace();
+        }
+
+        /*try{
             Connection conn = DriverManager.getConnection(url);
-            
             DatabaseMetaData metaData = conn.getMetaData();
             ResultSet results = metaData.getTables(null , null, TABLE_NAME ,null);
             while(results.next()){
@@ -23,7 +31,7 @@ public class App {
             }
         }catch(SQLException e){
             e.printStackTrace();
-        }
+        }*/
         
     }
 }

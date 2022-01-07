@@ -40,7 +40,7 @@ public class SchoolDAO {
     }
 
     /**
-     * 
+     * The author made this as a test. This is not part of any task.
      * @param ID
      * @return
      * @throws SchoolDBException
@@ -93,8 +93,6 @@ public class SchoolDAO {
     }
 
     public String createLeaseContract(String student_ID, String rental_instrument_ID) {
-        // Gör ett nytt leasecontract
-        // Gör instrumentet not available
         try {
             Statement statement = this.conn.createStatement();
             if (statement.executeQuery("SELECT * FROM rental_instrument WHERE rental_instrument_id='" + rental_instrument_ID + "' AND available='true'").next()) {
@@ -103,6 +101,7 @@ public class SchoolDAO {
                             "INSERT INTO lease_contract (student_id, rental_instrument_id, price, time_start, time_end) VALUES ("
                                     + student_ID + ", " + rental_instrument_ID
                                     + ", 39, '2021-02-11 17:21:05', '2021-10-23 21:35:51');");
+                    
                     statement.executeUpdate("UPDATE rental_instrument SET available='false' WHERE rental_instrument_ID=" + rental_instrument_ID);
                     conn.commit();
                     return "Created a new lease contract";
@@ -138,5 +137,9 @@ public class SchoolDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void prepareStatements(){
+        
     }
 }

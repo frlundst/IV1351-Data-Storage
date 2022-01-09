@@ -1,7 +1,5 @@
 package integration;
 
-import java.sql.SQLException;
-
 public class SchoolDBException extends Exception {
     public SchoolDBException(String reason){
         super(reason);

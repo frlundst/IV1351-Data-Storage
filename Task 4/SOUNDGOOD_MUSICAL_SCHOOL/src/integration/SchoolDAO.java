@@ -8,77 +8,50 @@ public class SchoolDAO {
     private static final String url = "jdbc:postgresql://localhost/soundgood_musical_school_v3?user=postgres&password=hej12345";
     private Connection conn;
 
-    private static final String STUDENT_ID_COLUMN_NAME = "student_id";
-    private static final String STUDENT_SSN_COLUMN_NAME = "personal_number";
-    private static final String STUDENT_NAME_COLUMN_NAME = "name";
-    private static final String STUDENT_AGE_COLUMN_NAME = "age";
-    private static final String STUDENT_ADDRESS_COLUMN_NAME = "address";
-    private static final String STUDENT_SKILL_COLUMN_NAME = "skill_level";
-    private static final String STUDENT_SIBLING_COLUMN_NAME = "sibling";
-    private static final String STUDENT_ACCEPTED_COLUMN_NAME = "is_accepted";
-
+    private static final String INSTRUMENT_TABLE_NAME = "rental_instrument";
     private static final String INSTRUMENT_ID_COLUMN_NAME = "rental_instrument_id";
     private static final String INSTRUMENT_TYPE_COLUMN_NAME = "instrument";
     private static final String INSTRUMENT_BRAND_COLUMN_NAME = "brand";
     private static final String INSTRUMENT_AVAILABLE_COLUMN_NAME = "available";
     private static final String INSTRUMENT_QUANTITY_COLUMN_NAME = "quantity";
 
-    public SchoolDAO() {
-        connectToDB();
+    private PreparedStatement findAvailableInstrumentByKind;
+    private PreparedStatement findAvailableInstrumentByID;
+
+    public SchoolDAO() throws SchoolDBException{
+        try {
+            connectToDB();
+            prepareStatements();
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new SchoolDBException("Could not connect to database!", e);
+        }
     }
 
     /**
      * connectToDB method establish a connection to the database
      */
-    private void connectToDB() {
-        try {
-            this.conn = DriverManager.getConnection(url);
-            this.conn.setAutoCommit(false);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
-    }
-
-    /**
-     * The author made this as a test. This is not part of any task.
-     * @param ID
-     * @return
-     * @throws SchoolDBException
-     */
-    public Student findStudentByID(String ID) throws SchoolDBException {
-        ResultSet result = null;
-        try {
-            Statement statement = this.conn.createStatement();
-            result = statement.executeQuery("SELECT * FROM student WHERE student_id=" + ID);
-            if (result.next()) {
-                return new Student(result.getString(STUDENT_ID_COLUMN_NAME),
-                        result.getString(STUDENT_SSN_COLUMN_NAME),
-                        result.getString(STUDENT_NAME_COLUMN_NAME),
-                        result.getString(STUDENT_AGE_COLUMN_NAME),
-                        result.getString(STUDENT_ADDRESS_COLUMN_NAME),
-                        result.getString(STUDENT_SKILL_COLUMN_NAME),
-                        result.getString(STUDENT_SIBLING_COLUMN_NAME),
-                        result.getString(STUDENT_ACCEPTED_COLUMN_NAME));
-            }
-            conn.commit();
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
-        return null;
+    private void connectToDB() throws ClassNotFoundException, SQLException{
+            conn = DriverManager.getConnection(url);
+            conn.setAutoCommit(false);
     }
 
     /**
      * 
-     * @param kind
+     * @param lock Locks so that no UPDATEs or DELETEs can be
+     * performed on the the selected row or rows during the current transaction.
+     * @param kind The instrument kind.
      * @throws SchoolDBException
      */
-    public List<Instrument> readAllAvailableInstruments(String kind) throws SchoolDBException {
+    public List<Instrument> findAvailableInstruments(String kind, boolean lock) throws SchoolDBException {
+        PreparedStatement stmt;
+        if(lock) stmt = null;
+        else stmt = findAvailableInstrumentByKind;
+
         ResultSet result = null;
         List<Instrument> instruments = new ArrayList<>();
         try {
-            Statement statement = this.conn.createStatement();
-            result = statement.executeQuery(
-                    "SELECT * FROM rental_instrument WHERE instrument='" + kind + "' AND available='true'");
+            stmt.setString(1, kind);;
+            result = stmt.executeQuery();
             while (result.next()) {
                 instruments.add(new Instrument(result.getString(INSTRUMENT_ID_COLUMN_NAME),
                         result.getString(INSTRUMENT_TYPE_COLUMN_NAME),
@@ -86,15 +59,18 @@ public class SchoolDAO {
                         result.getString(INSTRUMENT_AVAILABLE_COLUMN_NAME),
                         result.getString(INSTRUMENT_QUANTITY_COLUMN_NAME)));
             }
+            if(!lock) conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            //Add closeResultSet
         }
         return instruments;
     }
 
     public String createLeaseContract(String student_ID, String rental_instrument_ID) {
         try {
-            Statement statement = this.conn.createStatement();
+            Statement statement = conn.createStatement();
             if (statement.executeQuery("SELECT * FROM rental_instrument WHERE rental_instrument_id='" + rental_instrument_ID + "' AND available='true'").next()) {
                 if (!statement.executeQuery("SELECT * FROM lease_contract WHERE student_id='" + student_ID + "' AND terminated='false'").next()) {
                     statement.executeUpdate(
@@ -139,7 +115,12 @@ public class SchoolDAO {
         return null;
     }
 
-    public void prepareStatements(){
-        
+    public void prepareStatements() throws SQLException{
+        findAvailableInstrumentByKind = conn.prepareStatement("SELECT * FROM " + INSTRUMENT_TABLE_NAME 
+            + " WHERE " + INSTRUMENT_TYPE_COLUMN_NAME + " = ? AND " + INSTRUMENT_AVAILABLE_COLUMN_NAME 
+            + "='true'");
+        findAvailableInstrumentByID = conn.prepareStatement("SELECT * FROM " + INSTRUMENT_TABLE_NAME 
+            + " WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? AND " + INSTRUMENT_AVAILABLE_COLUMN_NAME 
+            + "='true'");
     }
 }

@@ -24,17 +24,17 @@ WHERE EXTRACT(year FROM time_start) = 2022
 
 --"List all instructors who has given more than a specific number of lessons during the current month. Sum all lessons, independent of type,
 --and sort the result by the number of given lessons. This query will be used to find instructors risking to work too much, and will be executed daily.""
-EXPLAIN ANALYZE CREATE VIEW view3 AS
+EXPLAIN ANALYZE CREATE MATERIALIZED VIEW view3 AS
 SELECT instructor_id as Instructor,
 COUNT(type_of_lesson) as TotalLessons
 FROM lesson
 
-WHERE EXTRACT(month FROM time_start) = 1
+WHERE EXTRACT(month FROM time_start) = EXTRACT(month FROM now())
 GROUP BY Instructor HAVING COUNT(type_of_lesson)>1;
 
 --List all ensembles held during the next week, sorted by music genre and weekday. For each ensemble tell whether it's full booked, has 1-2 seats left 
 --or has more seats left. Hint: you might want to use a CASE statement in your query to produce the desired output.
-CREATE MATERIALIZED VIEW mv AS SELECT
+EXPLAIN ANALYZE CREATE MATERIALIZED VIEW mv AS SELECT
 to_char(time_start, 'Day') AS Weekday,
 genre AS Genre,
 max_nr_slots AS Seats,

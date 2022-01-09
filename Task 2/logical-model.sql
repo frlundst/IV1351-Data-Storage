@@ -54,7 +54,8 @@ CREATE TABLE lesson (
  price VARCHAR(500),
  genre VARCHAR(500),
  time_start DATE,
- time_end DATE
+ time_end DATE,
+ amount_of_students INT NOT NULL
 );
 
 ALTER TABLE lesson ADD CONSTRAINT PK_lesson PRIMARY KEY (lesson_id);
@@ -141,7 +142,8 @@ CREATE TABLE lease_contract (
  rental_instrument_id INT NOT NULL,
  price VARCHAR(500),
  time_start DATE,
- time_end DATE
+ time_end DATE,
+ terminated BOOLEAN
 );
 
 ALTER TABLE lease_contract ADD CONSTRAINT PK_lease_contract PRIMARY KEY (lease_id,student_id);

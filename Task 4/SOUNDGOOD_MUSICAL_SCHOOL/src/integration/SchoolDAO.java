@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SchoolDAO {
-    private static final String url = "jdbc:postgresql://localhost/soundgood_musical_school_v3?user=postgres&password=hej12345";
+    private static final String url = "jdbc:postgresql://localhost/Soundgood_musical_school_V5?user=postgres&password=123123";
     private Connection conn;
 
     private static final String INSTRUMENT_TABLE_NAME = "rental_instrument";

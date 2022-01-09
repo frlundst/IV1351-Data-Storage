@@ -10,15 +10,42 @@ public class Controller {
         this.dao = new SchoolDAO();
     }
 
-    public List<Instrument> findAvailableInstruments(String kind) throws SchoolDBException{
-        return this.dao.findAvailableInstruments(kind, false);
+    /**
+     * 
+     * @param kind
+     * @return
+     */
+    public List<Instrument> findAvailableInstruments(String kind){
+        try {
+            return this.dao.findAvailableInstruments(kind);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    public String createLeaseContract(String student_id, String rental_instrument_id){
-        return this.dao.createLeaseContract(student_id, rental_instrument_id);
+    /**
+     * 
+     * @param student_id
+     * @param rental_instrument_id
+     */
+    public void createLeaseContract(int student_id, int rental_instrument_id){
+        try {
+            this.dao.createLeaseContract(student_id, rental_instrument_id);
+        } catch (SchoolDBException e) {
+            e.printStackTrace();
+        }
     }
 
-    public String deleteLeaseContract(String student_ID){
-        return this.dao.deleteLeaseContract(student_ID);
+    /**
+     * 
+     * @param student_ID
+     */
+    public void deleteLeaseContract(int student_ID){
+        try {
+            this.dao.terminateLeaseContract(student_ID);
+        } catch (SchoolDBException e) {
+            e.printStackTrace();
+        }
     }
 }

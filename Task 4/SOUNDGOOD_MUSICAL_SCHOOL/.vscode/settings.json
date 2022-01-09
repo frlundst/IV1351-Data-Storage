@@ -4,4 +4,7 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar"
     ],
+    "files.exclude": {
+        "**/.class": true
+    },
 }

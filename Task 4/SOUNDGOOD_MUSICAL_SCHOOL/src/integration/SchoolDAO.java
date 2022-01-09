@@ -1,11 +1,12 @@
 package integration;
+
 import model.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SchoolDAO {
-    private static final String url = "jdbc:postgresql://localhost/Soundgood_musical_school_V5?user=postgres&password=123123";
+    private static final String url = "jdbc:postgresql://localhost/soundgood_musical_school_v3?user=postgres&password=hej12345";
     private Connection conn;
 
     private static final String INSTRUMENT_TABLE_NAME = "rental_instrument";
@@ -15,10 +16,20 @@ public class SchoolDAO {
     private static final String INSTRUMENT_AVAILABLE_COLUMN_NAME = "available";
     private static final String INSTRUMENT_QUANTITY_COLUMN_NAME = "quantity";
 
+    private static final String LEASE_CONTRACT_TABLE_NAME = "lease_contract";
+    private static final String LEASE_TERMINATED_COLUMN_NAME = "terminated";
+
+    private static final String STUDENT_ID_COLUMN_NAME = "student_id";
+
     private PreparedStatement findAvailableInstrumentByKind;
     private PreparedStatement findAvailableInstrumentByID;
+    private PreparedStatement findActiveLeaseContractByID;
+    private PreparedStatement createLeaseContract;
+    private PreparedStatement makeInstrumentUnavailableByID;
+    private PreparedStatement makeInstrumentAvailableByID;
+    private PreparedStatement terminateLeaseContrectByStudentID;
 
-    public SchoolDAO() throws SchoolDBException{
+    public SchoolDAO() throws SchoolDBException {
         try {
             connectToDB();
             prepareStatements();
@@ -29,30 +40,27 @@ public class SchoolDAO {
 
     /**
      * connectToDB method establish a connection to the database
+     * @throws ClassNotFoundException
+     * @throws SQLException
      */
-    private void connectToDB() throws ClassNotFoundException, SQLException{
-            conn = DriverManager.getConnection(url);
-            conn.setAutoCommit(false);
+    private void connectToDB() throws ClassNotFoundException, SQLException {
+        conn = DriverManager.getConnection(url);
+        conn.setAutoCommit(false);
     }
 
     /**
      * 
-     * @param lock Locks so that no UPDATEs or DELETEs can be
-     * performed on the the selected row or rows during the current transaction.
      * @param kind The instrument kind.
      * @throws SchoolDBException
      * @throws SQLException
      */
-    public List<Instrument> findAvailableInstruments(String kind, boolean lock) throws SchoolDBException, SQLException {
-        PreparedStatement stmt;
-        if(lock) stmt = null;
-        else stmt = findAvailableInstrumentByKind;
-
+    public List<Instrument> findAvailableInstruments(String kind) throws SchoolDBException {
         ResultSet result = null;
         List<Instrument> instruments = new ArrayList<>();
         try {
-            stmt.setString(1, kind);;
-            result = stmt.executeQuery();
+            findAvailableInstrumentByKind.setString(1, kind);
+            ;
+            result = findAvailableInstrumentByKind.executeQuery();
             while (result.next()) {
                 instruments.add(new Instrument(result.getString(INSTRUMENT_ID_COLUMN_NAME),
                         result.getString(INSTRUMENT_TYPE_COLUMN_NAME),
@@ -60,71 +68,129 @@ public class SchoolDAO {
                         result.getString(INSTRUMENT_AVAILABLE_COLUMN_NAME),
                         result.getString(INSTRUMENT_QUANTITY_COLUMN_NAME)));
             }
-            if(!lock) conn.commit();
+            conn.commit();
         } catch (SQLException e) {
-            conn.rollback();
-            e.printStackTrace();
+            handleException("Could not get instruments.", e);
         } finally {
-            //Add closeResultSet
+            // Add closeResultSet
         }
         return instruments;
     }
 
-    public String createLeaseContract(String student_ID, String rental_instrument_ID) throws SQLException {
+    /**
+     * 
+     * @param student_ID
+     * @param rental_instrument_ID
+     * @throws SchoolDBException
+     */
+    public void createLeaseContract(int student_ID, int rental_instrument_ID) throws SchoolDBException {
         try {
-            Statement statement = conn.createStatement();
-            if (statement.executeQuery("SELECT * FROM rental_instrument WHERE rental_instrument_id='" + rental_instrument_ID + "' AND available='true'").next()) {
-                if (!statement.executeQuery("SELECT * FROM lease_contract WHERE student_id='" + student_ID + "' AND terminated='false'").next()) {
-                    statement.executeUpdate(
-                            "INSERT INTO lease_contract (student_id, rental_instrument_id, price, time_start, time_end) VALUES ("
-                                    + student_ID + ", " + rental_instrument_ID
-                                    + ", 39, '2021-02-11 17:21:05', '2021-10-23 21:35:51');");
-                    
-                    statement.executeUpdate("UPDATE rental_instrument SET available='false' WHERE rental_instrument_ID=" + rental_instrument_ID);
-                    conn.commit();
-                    return "Created a new lease contract";
-                } else {
-                    return "This student already rents an instrument";
-                }
-            }else{
-                return "Someone else is renting this instrument";
+            findAvailableInstrumentByID.setInt(1, rental_instrument_ID);
+            if (!findAvailableInstrumentByID.executeQuery().next()) {
+                handleException("Instrument is not available", null);
             }
-        } catch (SQLException e) {
-            conn.rollback();
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public String deleteLeaseContract(String student_ID) throws SQLException{
-        try {
-            String rental_instrument_ID = null;
-            Statement statement = this.conn.createStatement();
-
-            ResultSet result = statement.executeQuery("SELECT * FROM lease_contract WHERE student_id='" + student_ID + "'");
-            if(result.next()){
-                rental_instrument_ID = result.getString("rental_instrument_id");
-                System.out.println(rental_instrument_ID);
+            findActiveLeaseContractByID.setInt(1, student_ID);
+            if (findActiveLeaseContractByID.executeQuery().next()) {
+                handleException("Student already has an active lease contract!", null);
             }
-
-            statement.executeUpdate("UPDATE lease_contract SET terminated='true' where student_id='" + student_ID + "'");
-            
-            statement.executeUpdate("UPDATE rental_instrument SET available='true' where rental_instrument_id='" + rental_instrument_ID + "'");
+            createLeaseContract.setInt(1, student_ID);
+            createLeaseContract.setInt(2, rental_instrument_ID);
+            int createdRows = createLeaseContract.executeUpdate();
+            if (createdRows != 1) {
+                handleException("Could not create lease contract", null);
+            }
+            makeInstrumentUnavailableByID.setInt(1, rental_instrument_ID);
+            int updatedRows = makeInstrumentUnavailableByID.executeUpdate();
+            if (updatedRows != 1) {
+                handleException("Could not make instrument unavailable", null);
+            }
             conn.commit();
-            return "Lease contract terminated";
         } catch (SQLException e) {
-            conn.rollback();
-            e.printStackTrace();
+            handleException("Could not create lease contract", e);
         }
-        return null;
     }
 
-    public void prepareStatements() throws SQLException{
-        findAvailableInstrumentByKind = conn.prepareStatement("SELECT * FROM " + INSTRUMENT_TABLE_NAME 
-            + " WHERE " + INSTRUMENT_TYPE_COLUMN_NAME + " = ? AND " + INSTRUMENT_AVAILABLE_COLUMN_NAME 
-            + "='true'");
-        findAvailableInstrumentByID = conn.prepareStatement("SELECT * FROM " + INSTRUMENT_TABLE_NAME 
-            + " WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? AND " + INSTRUMENT_AVAILABLE_COLUMN_NAME 
-            + "='true'");
+    /**
+     * 
+     * @param student_ID
+     * @throws SchoolDBException
+     */
+    public void terminateLeaseContract(int student_ID) throws SchoolDBException {
+        ResultSet result = null;
+        try {
+            findActiveLeaseContractByID.setInt(1, student_ID);
+            result = findActiveLeaseContractByID.executeQuery();
+            if (!result.next()) {
+                handleException("Could not find an active lease contract with the given student ID", null);
+            }
+            int rental_instrument_ID = result.getInt("rental_instrument_id");
+            terminateLeaseContrectByStudentID.setInt(1, student_ID);
+            int updatedRows = terminateLeaseContrectByStudentID.executeUpdate();
+            if(updatedRows != 1){
+                handleException("Could not terminate lease contract", null);
+            }
+            makeInstrumentAvailableByID.setInt(1, rental_instrument_ID);
+            updatedRows = makeInstrumentAvailableByID.executeUpdate();
+            if(updatedRows != 1){
+                handleException("Could not make instrument available", null);
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Could not terminate lease contract", e);
+        }
+    }
+
+    /**
+     * prepared statements to be executed.
+     * @throws SQLException
+     */
+    public void prepareStatements() throws SQLException {
+        findAvailableInstrumentByKind = conn.prepareStatement("SELECT * FROM " + INSTRUMENT_TABLE_NAME
+                + " WHERE " + INSTRUMENT_TYPE_COLUMN_NAME + " = ? AND " + INSTRUMENT_AVAILABLE_COLUMN_NAME
+                + "='true'");
+
+        findAvailableInstrumentByID = conn.prepareStatement("SELECT * FROM " + INSTRUMENT_TABLE_NAME
+                + " WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? AND " + INSTRUMENT_AVAILABLE_COLUMN_NAME
+                + "='true'");
+
+        findActiveLeaseContractByID = conn.prepareStatement("SELECT * FROM " + LEASE_CONTRACT_TABLE_NAME
+                + " WHERE " + STUDENT_ID_COLUMN_NAME + " = ? AND " + LEASE_TERMINATED_COLUMN_NAME + "='false'");
+
+        createLeaseContract = conn.prepareStatement("INSERT INTO " + LEASE_CONTRACT_TABLE_NAME
+                + " (student_id, rental_instrument_id, price, time_start, time_end, terminated)" +
+                "VALUES ( ? , ? , 39, '2021-02-11 17:21:05', '2021-10-23 21:35:51', 'false');");
+
+        makeInstrumentUnavailableByID = conn.prepareStatement("UPDATE " + INSTRUMENT_TABLE_NAME
+                + " SET " + INSTRUMENT_AVAILABLE_COLUMN_NAME + " ='false' WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? ");
+        
+        terminateLeaseContrectByStudentID = conn.prepareStatement("UPDATE " + LEASE_CONTRACT_TABLE_NAME 
+        + " SET " + LEASE_TERMINATED_COLUMN_NAME + " ='true' WHERE " + STUDENT_ID_COLUMN_NAME + " = ? AND " + LEASE_TERMINATED_COLUMN_NAME + " ='false'");
+
+        makeInstrumentAvailableByID = conn.prepareStatement("UPDATE " + INSTRUMENT_TABLE_NAME 
+        + " SET " + INSTRUMENT_AVAILABLE_COLUMN_NAME + " ='true' WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? ");
+    }
+
+    /**
+     * handleException handles exceptions and can be called by other methods with 
+     * if-statements to ensure that nothing goes wrong during the query process and
+     * makes the code follow ACID.
+     * @param failureMsg
+     * @param cause
+     * @throws SchoolDBException
+     */
+    private void handleException(String failureMsg, Exception cause) throws SchoolDBException {
+        String completeFailureMsg = failureMsg;
+        try {
+            conn.rollback();
+        } catch (SQLException rollbackExc) {
+            completeFailureMsg = completeFailureMsg +
+                    ". Also failed to rollback transaction because of: " + rollbackExc.getMessage();
+        }
+
+        if (cause != null) {
+            throw new SchoolDBException(failureMsg, cause);
+        } else {
+            throw new SchoolDBException(failureMsg);
+        }
     }
 }

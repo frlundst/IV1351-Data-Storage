@@ -41,8 +41,9 @@ public class SchoolDAO {
      * performed on the the selected row or rows during the current transaction.
      * @param kind The instrument kind.
      * @throws SchoolDBException
+     * @throws SQLException
      */
-    public List<Instrument> findAvailableInstruments(String kind, boolean lock) throws SchoolDBException {
+    public List<Instrument> findAvailableInstruments(String kind, boolean lock) throws SchoolDBException, SQLException {
         PreparedStatement stmt;
         if(lock) stmt = null;
         else stmt = findAvailableInstrumentByKind;
@@ -61,6 +62,7 @@ public class SchoolDAO {
             }
             if(!lock) conn.commit();
         } catch (SQLException e) {
+            conn.rollback();
             e.printStackTrace();
         } finally {
             //Add closeResultSet
@@ -68,7 +70,7 @@ public class SchoolDAO {
         return instruments;
     }
 
-    public String createLeaseContract(String student_ID, String rental_instrument_ID) {
+    public String createLeaseContract(String student_ID, String rental_instrument_ID) throws SQLException {
         try {
             Statement statement = conn.createStatement();
             if (statement.executeQuery("SELECT * FROM rental_instrument WHERE rental_instrument_id='" + rental_instrument_ID + "' AND available='true'").next()) {
@@ -88,12 +90,13 @@ public class SchoolDAO {
                 return "Someone else is renting this instrument";
             }
         } catch (SQLException e) {
+            conn.rollback();
             e.printStackTrace();
         }
         return null;
     }
 
-    public String deleteLeaseContract(String student_ID){
+    public String deleteLeaseContract(String student_ID) throws SQLException{
         try {
             String rental_instrument_ID = null;
             Statement statement = this.conn.createStatement();
@@ -110,6 +113,7 @@ public class SchoolDAO {
             conn.commit();
             return "Lease contract terminated";
         } catch (SQLException e) {
+            conn.rollback();
             e.printStackTrace();
         }
         return null;

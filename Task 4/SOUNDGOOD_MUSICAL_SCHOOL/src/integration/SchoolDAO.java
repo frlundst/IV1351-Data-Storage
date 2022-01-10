@@ -27,7 +27,8 @@ public class SchoolDAO {
     private PreparedStatement createLeaseContract;
     private PreparedStatement makeInstrumentUnavailableByID;
     private PreparedStatement makeInstrumentAvailableByID;
-    private PreparedStatement terminateLeaseContrectByStudentID;
+    private PreparedStatement terminateLeaseContrectByInstrumentID;
+    private PreparedStatement findActiveLeaseContractByInstrumentID;
 
     public SchoolDAO() throws SchoolDBException {
         try {
@@ -84,14 +85,20 @@ public class SchoolDAO {
      * @throws SchoolDBException
      */
     public void createLeaseContract(int student_ID, int rental_instrument_ID) throws SchoolDBException {
+        ResultSet result = null;
+        int rowCount = 0;
         try {
             findAvailableInstrumentByID.setInt(1, rental_instrument_ID);
             if (!findAvailableInstrumentByID.executeQuery().next()) {
                 handleException("Instrument is not available", null);
             }
             findActiveLeaseContractByID.setInt(1, student_ID);
-            if (findActiveLeaseContractByID.executeQuery().next()) {
-                handleException("Student already has an active lease contract!", null);
+            result = findActiveLeaseContractByID.executeQuery();
+            while(result.next()){
+                rowCount++;
+            }
+            if(rowCount > 1){
+                handleException("Student already has two lease contracts active!", null);
             }
             createLeaseContract.setInt(1, student_ID);
             createLeaseContract.setInt(2, rental_instrument_ID);
@@ -107,6 +114,8 @@ public class SchoolDAO {
             conn.commit();
         } catch (SQLException e) {
             handleException("Could not create lease contract", e);
+        }finally{
+            closeResultSet("Could not terminate lease contract.", result);
         }
     }
 
@@ -115,21 +124,20 @@ public class SchoolDAO {
      * @param student_ID
      * @throws SchoolDBException
      */
-    public void terminateLeaseContract(int student_ID) throws SchoolDBException {
+    public void terminateLeaseContract(int instrument_id) throws SchoolDBException {
         ResultSet result = null;
         try {
-            findActiveLeaseContractByID.setInt(1, student_ID);
-            result = findActiveLeaseContractByID.executeQuery();
+            findActiveLeaseContractByInstrumentID.setInt(1, instrument_id);
+            result = findActiveLeaseContractByInstrumentID.executeQuery();
             if (!result.next()) {
                 handleException("Could not find an active lease contract with the given student ID", null);
             }
-            int rental_instrument_ID = result.getInt("rental_instrument_id");
-            terminateLeaseContrectByStudentID.setInt(1, student_ID);
-            int updatedRows = terminateLeaseContrectByStudentID.executeUpdate();
+            terminateLeaseContrectByInstrumentID.setInt(1, instrument_id);
+            int updatedRows = terminateLeaseContrectByInstrumentID.executeUpdate();
             if(updatedRows != 1){
                 handleException("Could not terminate lease contract", null);
             }
-            makeInstrumentAvailableByID.setInt(1, rental_instrument_ID);
+            makeInstrumentAvailableByID.setInt(1, instrument_id);
             updatedRows = makeInstrumentAvailableByID.executeUpdate();
             if(updatedRows != 1){
                 handleException("Could not make instrument available", null);
@@ -157,6 +165,9 @@ public class SchoolDAO {
 
         findActiveLeaseContractByID = conn.prepareStatement("SELECT * FROM " + LEASE_CONTRACT_TABLE_NAME
                 + " WHERE " + STUDENT_ID_COLUMN_NAME + " = ? AND " + LEASE_TERMINATED_COLUMN_NAME + "='false'");
+        
+        findActiveLeaseContractByInstrumentID = conn.prepareStatement("SELECT * FROM " + LEASE_CONTRACT_TABLE_NAME
+                + " WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? AND " + LEASE_TERMINATED_COLUMN_NAME + "='false'");
 
         createLeaseContract = conn.prepareStatement("INSERT INTO " + LEASE_CONTRACT_TABLE_NAME
                 + " (student_id, rental_instrument_id, price, time_start, time_end, terminated)" +
@@ -165,8 +176,8 @@ public class SchoolDAO {
         makeInstrumentUnavailableByID = conn.prepareStatement("UPDATE " + INSTRUMENT_TABLE_NAME
                 + " SET " + INSTRUMENT_AVAILABLE_COLUMN_NAME + " ='false' WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? ");
         
-        terminateLeaseContrectByStudentID = conn.prepareStatement("UPDATE " + LEASE_CONTRACT_TABLE_NAME 
-        + " SET " + LEASE_TERMINATED_COLUMN_NAME + " ='true' WHERE " + STUDENT_ID_COLUMN_NAME + " = ? AND " + LEASE_TERMINATED_COLUMN_NAME + " ='false'");
+        terminateLeaseContrectByInstrumentID = conn.prepareStatement("UPDATE " + LEASE_CONTRACT_TABLE_NAME 
+        + " SET " + LEASE_TERMINATED_COLUMN_NAME + " ='true' WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? AND " + LEASE_TERMINATED_COLUMN_NAME + " ='false'");
 
         makeInstrumentAvailableByID = conn.prepareStatement("UPDATE " + INSTRUMENT_TABLE_NAME 
         + " SET " + INSTRUMENT_AVAILABLE_COLUMN_NAME + " ='true' WHERE " + INSTRUMENT_ID_COLUMN_NAME + " = ? ");

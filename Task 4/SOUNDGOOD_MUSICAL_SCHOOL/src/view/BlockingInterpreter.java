@@ -21,7 +21,6 @@ public class BlockingInterpreter {
      */
     public void handleCmds() throws SchoolDBException {
         keepReceivingCommands = true;
-        String student_ID;
         String command;
         System.out.println("\r\nWELCOME TO SOUNDGOOD MUSICAL SCHOOL LEASING SYSTEM\r\n");
         while (keepReceivingCommands) {
@@ -47,13 +46,13 @@ public class BlockingInterpreter {
                     System.out.print("Enter ID of instrument that student want to rent: ");
                     String rental_instrument_id = scanner.nextLine();
                     System.out.print("Enter ID of student that want to rent: ");
-                    student_ID = scanner.nextLine();
+                    String student_ID = scanner.nextLine();
                     controller.createLeaseContract(Integer.parseInt(student_ID), Integer.parseInt(rental_instrument_id));
                     break;
                 case "3":
-                    System.out.print("Enter ID of student for which lease contract to be terminated: ");
-                    student_ID = scanner.nextLine();
-                    controller.deleteLeaseContract(Integer.parseInt(student_ID));
+                    System.out.print("Enter ID of instrument for which lease contract to be terminated: ");
+                    String instrument_ID = scanner.nextLine();
+                    controller.deleteLeaseContract(Integer.parseInt(instrument_ID));
                     break;
                 case "4":
                     keepReceivingCommands = false;

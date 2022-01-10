@@ -72,7 +72,7 @@ public class SchoolDAO {
         } catch (SQLException e) {
             handleException("Could not get instruments.", e);
         } finally {
-            // Add closeResultSet
+            closeResultSet("Could not get instruments.", result);
         }
         return instruments;
     }
@@ -137,6 +137,8 @@ public class SchoolDAO {
             conn.commit();
         } catch (SQLException e) {
             handleException("Could not terminate lease contract", e);
+        } finally{
+            closeResultSet("Could not terminate lease contract.", result);
         }
     }
 
@@ -191,6 +193,20 @@ public class SchoolDAO {
             throw new SchoolDBException(failureMsg, cause);
         } else {
             throw new SchoolDBException(failureMsg);
+        }
+    }
+
+    /**
+     * 
+     * @param failureMsg
+     * @param result
+     * @throws BankDBException
+     */
+    private void closeResultSet(String failureMsg, ResultSet result) throws SchoolDBException {
+        try {
+            result.close();
+        } catch (Exception e) {
+            throw new SchoolDBException(failureMsg + " Could not close result set.", e);
         }
     }
 }

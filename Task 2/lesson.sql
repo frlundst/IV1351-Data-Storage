@@ -36,3 +36,9 @@ INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, in
 VALUES(3, 'Individual', '5','10', 'harp', 'beginner', '304', '100','classical','2021-01-15 13:00:00', '2021-07-27 15:00:00', 1);
 INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end, amount_of_students) 
 VALUES(1, 'Ensamble', '5','10', 'harp', 'beginner', '304', '100','classical','2021-01-15 13:00:00', '2021-07-27 15:00:00', 10);
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end, amount_of_students) 
+VALUES(4, 'Group', '3','10', 'piano', 'intermediate', '301', '200','rock','2022-01-17 13:00:00', '2022-01-17 15:00:00', 6);
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end, amount_of_students) 
+VALUES(7, 'Ensamble', '4','10', 'all', 'intermediate', '301', '200','classical','2022-01-18 13:00:00', '2022-01-18 15:00:00', 4);
+INSERT INTO lesson(instructor_id, type_of_lesson, min_nr_slots, max_nr_slots, instrument, skill_level, place, price, genre, time_start, time_end, amount_of_students) 
+VALUES(1, 'Group', '3','10', 'flute', 'intermediate', '301', '200','rock','2022-01-23 13:00:00', '2022-01-23 15:00:00', 4);
